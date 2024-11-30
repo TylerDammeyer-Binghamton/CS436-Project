@@ -47,18 +47,24 @@ class Informer(nn.Module):
         self.decoder = Decoder(
             [
                 DecoderLayer(
-                  [
                     AttentionLayer(
-                        FullAttention(False, factor, attention_dropout=dropout, output_attention=False),
+                        Attn(True, factor, attention_dropout=dropout, output_attention=False), 
                         d_model, 
                         n_heads, 
-                        mix=False
-                    )for _ in range(3) # 3 scales
-                  ],
-                  d_model=d_model,
-                  d_ff=d_ff,
-                  dropout=dropout,
-                  activation=activation
+                        mix=mix
+                    ),
+                    [
+                        AttentionLayer(
+                            FullAttention(False, factor, attention_dropout=dropout, output_attention=False),
+                            d_model, 
+                            n_heads, 
+                            mix=False
+                        )for _ in range(3) # 3 scales
+                    ],
+                    d_model=d_model,
+                    d_ff=d_ff,
+                    dropout=dropout,
+                    activation=activation
                 )
                 for _ in range(d_layers)  # d_layers is the number of decoder layers
             ],
@@ -86,7 +92,7 @@ class Informer(nn.Module):
 
         # Decoder forward pass
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
-        dec_out = self.decoder(dec_out, multi_scale_cross, cross_masks=[dec_enc_mask] * len(multi_scale_cross))
+        dec_out = self.decoder(dec_out, multi_scale_cross, x_mask=dec_self_mask, cross_masks=[dec_enc_mask] * len(multi_scale_cross))
         dec_out = self.projection(dec_out)
         
         # Extract the final prediction sequence
