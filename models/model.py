@@ -47,16 +47,18 @@ class Informer(nn.Module):
         self.decoder = Decoder(
             [
                 DecoderLayer(
+                  [
                     AttentionLayer(
                         FullAttention(False, factor, attention_dropout=dropout, output_attention=False),
                         d_model, 
                         n_heads, 
                         mix=False
-                    ),
-                    d_model=d_model,
-                    d_ff=d_ff,
-                    dropout=dropout,
-                    activation=activation
+                    )for _ in range(3) # 3 scales
+                  ],
+                  d_model=d_model,
+                  d_ff=d_ff,
+                  dropout=dropout,
+                  activation=activation
                 )
                 for _ in range(d_layers)  # d_layers is the number of decoder layers
             ],
@@ -66,16 +68,25 @@ class Informer(nn.Module):
         # self.end_conv2 = nn.Conv1d(in_channels=d_model, out_channels=c_out, kernel_size=1, bias=True)
         self.projection = nn.Linear(d_model, c_out, bias=True)
         
+    def create_multi_scale(self, enc_out):
+        # Three scales (original, downsampled, and coarsely downsampled)
+        scale_1 = enc_out  # Original
+        scale_2 = F.avg_pool1d(enc_out.transpose(1, 2), kernel_size=2).transpose(1, 2)  # Downsampled by 2
+        scale_3 = F.avg_pool1d(enc_out.transpose(1, 2), kernel_size=4).transpose(1, 2)  # Downsampled by 4
+        return [scale_1, scale_2, scale_3]
+
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, 
             enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
         # Encoder forward pass
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
 
+        # Create the scales
+        multi_scale_cross = self.create_multi_scale(enc_out)
+
         # Decoder forward pass
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
-        # Pass only `enc_out` and `dec_enc_mask` to the new decoder
-        dec_out = self.decoder(dec_out, enc_out, cross_mask=dec_enc_mask)
+        dec_out = self.decoder(dec_out, multi_scale_cross, cross_masks=[dec_enc_mask] * len(multi_scale_cross))
         dec_out = self.projection(dec_out)
         
         # Extract the final prediction sequence
