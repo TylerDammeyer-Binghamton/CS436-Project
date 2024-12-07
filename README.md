@@ -1,36 +1,17 @@
-# Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting (AAAI'21 Best Paper)
+# InformerJT: Efficient Transformer Solution for Long Sequence Time-Series Forecasting With Cross-Attention Focused Decoder
 ![Python 3.6](https://img.shields.io/badge/python-3.6-green.svg?style=plastic)
 ![PyTorch 1.2](https://img.shields.io/badge/PyTorch%20-%23EE4C2C.svg?style=plastic)
 ![cuDNN 7.3.1](https://img.shields.io/badge/cudnn-7.3.1-green.svg?style=plastic)
 ![License CC BY-NC-SA](https://img.shields.io/badge/license-CC_BY--NC--SA--green.svg?style=plastic)
 
-This is the origin Pytorch implementation of Informer in the following paper: 
-[Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436). Special thanks to `Jieqi Peng`@[cookieminions](https://github.com/cookieminions) for building this repo.
+## Contributors:
+TylerDammeyer-Binghamton: Attempted to implement multi-scale cross-attention in the decoder. Added create multi-scale function in informer class as well as aggregating the scales together in the decoder layer.
 
-:triangular_flag_on_post:**News**(Mar 27, 2023): We will release Informer V2 soon.
+jonelps: Removed self-attention from the decoder to test effects on performance. Modified decoder, decoderlayer, and informer classes to solely utilize cross-attention. 
 
-:triangular_flag_on_post:**News**(Feb 28, 2023): The Informer's [extension paper](https://www.sciencedirect.com/science/article/pii/S0004370223000322) is online on AIJ.
-
-:triangular_flag_on_post:**News**(Mar 25, 2021): We update all experiment [results](#resultslink) with hyperparameter settings.
-
-:triangular_flag_on_post:**News**(Feb 22, 2021): We provide [Colab Examples](#colablink) for friendly usage.
-
-:triangular_flag_on_post:**News**(Feb 8, 2021): Our Informer paper has been awarded [AAAI'21 Best Paper \[Official\]](https://aaai.org/Conferences/AAAI-21/aaai-outstanding-and-distinguished-papers/)[\[Beihang\]](http://scse.buaa.edu.cn/info/1097/7443.htm)[\[Rutgers\]](https://www.business.rutgers.edu/news/hui-xiong-and-research-colleagues-receive-aaai-best-paper-award)! We will continue this line of research and update on this repo. Please star this repo and [cite](#citelink) our paper if you find our work is helpful for you.
-
-<p align="center">
-<img src=".\img\informer.png" height = "360" alt="" align=center />
-<br><br>
-<b>Figure 1.</b> The architecture of Informer.
-</p>
-
-## ProbSparse Attention
-The self-attention scores form a long-tail distribution, where the "active" queries lie in the "head" scores and "lazy" queries lie in the "tail" area. We designed the ProbSparse Attention to select the "active" queries rather than the "lazy" queries. The ProbSparse Attention with Top-u queries forms a sparse Transformer by the probability distribution.
-`Why not use Top-u keys?` The self-attention layer's output is the re-represent of input. It is formulated as a weighted combination of values w.r.t. the score of dot-product pairs. The top queries with full keys encourage a complete re-represent of leading components in the input, and it is equivalent to selecting the "head" scores among all the dot-product pairs. If we choose Top-u keys, the full keys just preserve the trivial sum of values within the "long tail" scores but wreck the leading components' re-represent.
-<p align="center">
-<img src=".\img\probsparse_intro.png" height = "320" alt="" align=center />
-<br><br>
-<b>Figure 2.</b> The illustration of ProbSparse Attention.
-</p>
+This is a modification to Informer which can be found in the following paper: 
+[Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting](https://arxiv.org/abs/2012.07436).
+Main subject of testing can be found in branch "jonel" where the decoder has self-attention removed.
 
 ## Requirements
 
@@ -54,7 +35,7 @@ The required data files should be put into `data/ETT/` folder. A demo slice of t
 <p align="center">
 <img src="./img/data.png" height = "168" alt="" align=center />
 <br><br>
-<b>Figure 3.</b> An example of the ETT data.
+<b>Figure 1.</b> An example of the ETT data.
 </p>
 
 The ECL data and Weather data can be downloaded here.
@@ -163,69 +144,14 @@ The detailed descriptions about the arguments are as following:
 
 ## <span id="resultslink">Results</span>
 
-We have updated the experiment results of all methods due to the change in data scaling. We are lucky that Informer gets performance improvement. Thank you @lk1983823 for reminding the data scaling in [issue 41](https://github.com/zhouhaoyi/Informer2020/issues/41).
-
 Besides, the experiment parameters of each data set are formated in the `.sh` files in the directory `./scripts/`. You can refer to these parameters for experiments, and you can also adjust the parameters to obtain better mse and mae results or draw better prediction figures.
-
-<p align="center">
-<img src="./img/result_univariate.png" height = "500" alt="" align=center />
-<br><br>
-<b>Figure 4.</b> Univariate forecasting results.
-</p>
 
 <p align="center">
 <img src="./img/result_multivariate.png" height = "500" alt="" align=center />
 <br><br>
-<b>Figure 5.</b> Multivariate forecasting results.
+<b>Figure 2.</b> Multivariate forecasting results.
 </p>
 
 
 ## FAQ
 If you run into a problem like `RuntimeError: The size of tensor a (98) must match the size of tensor b (96) at non-singleton dimension 1`, you can check torch version or modify code about `Conv1d` of `TokenEmbedding` in `models/embed.py` as the way of circular padding mode in Conv1d changed in different torch versions.
-
-
-## <span id="citelink">Citation</span>
-If you find this repository useful in your research, please consider citing the following papers:
-
-```
-@article{haoyietal-informerEx-2023,
-  author    = {Haoyi Zhou and
-               Jianxin Li and
-               Shanghang Zhang and
-               Shuai Zhang and
-               Mengyi Yan and
-               Hui Xiong},
-  title     = {Expanding the prediction capacity in long sequence time-series forecasting},
-  journal   = {Artificial Intelligence},
-  volume    = {318},
-  pages     = {103886},
-  issn      = {0004-3702},
-  year      = {2023},
-}
-```
-```
-@inproceedings{haoyietal-informer-2021,
-  author    = {Haoyi Zhou and
-               Shanghang Zhang and
-               Jieqi Peng and
-               Shuai Zhang and
-               Jianxin Li and
-               Hui Xiong and
-               Wancai Zhang},
-  title     = {Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting},
-  booktitle = {The Thirty-Fifth {AAAI} Conference on Artificial Intelligence, {AAAI} 2021, Virtual Conference},
-  volume    = {35},
-  number    = {12},
-  pages     = {11106--11115},
-  publisher = {{AAAI} Press},
-  year      = {2021},
-}
-```
-
-## Contact
-If you have any questions, feel free to contact Haoyi Zhou through Email (zhouhaoyi1991@gmail.com) or Github issues. Pull requests are highly welcomed!
-
-## Acknowledgments
-Thanks for the computing infrastructure provided by Beijing Advanced Innovation Center for Big Data and Brain Computing ([BDBC](http://bdbc.buaa.edu.cn/)).
-At the same time, thank you all for your attention to this work! [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fzhouhaoyi%2FInformer2020&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Hits+Count&edge_flat=false)](https://hits.seeyoufarm.com)
-[![Stargazers repo roster for @zhouhaoyi/Informer2020](https://reporoster.com/stars/zhouhaoyi/Informer2020)](https://github.com/zhouhaoyi/Informer2020/stargazers)
