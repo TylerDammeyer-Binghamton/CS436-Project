@@ -147,7 +147,7 @@ The detailed descriptions about the arguments are as following:
 Besides, the experiment parameters of each data set are formated in the `.sh` files in the directory `./scripts/`. You can refer to these parameters for experiments, and you can also adjust the parameters to obtain better mse and mae results or draw better prediction figures.
 
 <p align="center">
-<img src="./img/result_multivariate.png" height = "500" alt="" align=center />
+<img src="./img/InformerJT_Results.png" height = "150" alt="" align=center />
 <br><br>
 <b>Figure 2.</b> Multivariate forecasting results.
 </p>
