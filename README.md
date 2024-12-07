@@ -54,8 +54,7 @@ for file in `ls scripts`; do make run_module module="bash scripts/$script"; done
 ```
 
 ## Usage
-<span id="colablink">Colab Examples:</span> We provide google colabs to help reproduce and customize our repo, which includes `experiments(train and test)`, `prediction`, `visualization` and `custom data`.
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1_X7O2BkFLvqyCdZzDZvV2MB0aAvYALLC)
+A notebook file "InformerJT.ipynb" is provided which you can use in google colab to easily reproduce and customize the model, which includes `experiments(train and test)`, `prediction`, `visualization` and `custom data`.
 
 Commands for training and testing the model with *ProbSparse* self-attention on Dataset ETTh1, ETTh2 and ETTm1 respectively:
 
@@ -149,7 +148,7 @@ Besides, the experiment parameters of each data set are formated in the `.sh` fi
 <p align="center">
 <img src="./img/InformerJT_Results.png" height = "150" alt="" align=center />
 <br><br>
-<b>Figure 2.</b> Multivariate forecasting results.
+<b>Figure 2.</b> Multivariate forecasting results for InformerJT.
 </p>
 
 
